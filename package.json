@@ -1,5 +1,6 @@
 {
   "private": true,
+  "homepage": "https://fangshutao.github.io/dva-todolist/",
   "scripts": {
     "start": "roadhog server",
     "build": "roadhog build",
