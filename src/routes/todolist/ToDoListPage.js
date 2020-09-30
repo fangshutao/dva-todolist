@@ -25,17 +25,21 @@ import './index.less';
 const prefixClass = 'toDoListPage';
 
 const Index = (props) => {
+  // 加载状态
   const [loading, setLoading] = useState(false);
 
+  // 查询参数
   const [searchParams, setSearchParams] = useState({
     gjz: '',
   });
 
+  // 新增参数
   const [addParams, setAddParams] = useState({
     title: '',
     description: '',
   });
 
+  // 列表查询结果
   const [list, setList] = useState([]);
 
   useEffect(() => {
@@ -43,6 +47,7 @@ const Index = (props) => {
     autoSearch();
   }, [searchParams.gjz]);
 
+  // 获取数据
   const getWaitData = useCallback(async () => {
     setLoading(true);
     const res = await queryToDoListData(searchParams);
@@ -53,6 +58,7 @@ const Index = (props) => {
     }
   });
 
+  // 格式化数据
   const formatData = useCallback((data) => {
     const status0Data = [];
     const status1Data = [];
@@ -87,6 +93,7 @@ const Index = (props) => {
     return [...editData, ...time2Sort, ...time1Sort, ...time0Sort];
   });
 
+  // 新增数据
   const onAddData = useCallback(() => {
     if (addParams.title === '' && addParams.description === '') {
       message.warn('请至少填写一项内容');
@@ -112,6 +119,7 @@ const Index = (props) => {
     }
   });
 
+  // 删除数据
   const onDeleteData = useCallback((id) => {
     Modal.confirm({
       title: '确认删除该条待办信息吗？',
@@ -128,6 +136,7 @@ const Index = (props) => {
     });
   });
 
+  // 标注重要数据
   const onPointData = useCallback((id) => {
     const flag = pointToDoListData({ id });
     if (flag) {
@@ -135,6 +144,7 @@ const Index = (props) => {
     }
   });
 
+  // 完成待办
   const onFinishData = useCallback((id) => {
     const flag = finishToDoListData({ id });
     if (flag) {
@@ -142,6 +152,7 @@ const Index = (props) => {
     }
   });
 
+  // 查询参数改变
   const onItemChange = useCallback((value, field) => {
     setSearchParams({
       ...searchParams,
@@ -149,6 +160,7 @@ const Index = (props) => {
     });
   });
 
+  // 新增参数改变
   const onAddItemChange = useCallback((value, field) => {
     setAddParams({
       ...addParams,
