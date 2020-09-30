@@ -96,7 +96,10 @@ const Index = (props) => {
   // 新增数据
   const onAddData = useCallback(() => {
     if (addParams.title === '' && addParams.description === '') {
-      message.warn('请至少填写一项内容');
+      message.warn({
+        className: `${prefixClass}_message`,
+        content: '请至少填写一项内容',
+      });
       return;
     }
     const nowDate = new Date();
