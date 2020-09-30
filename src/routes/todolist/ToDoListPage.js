@@ -99,6 +99,9 @@ const Index = (props) => {
       id: nowDate.getTime(),
       date: nowDate.getTime(),
     };
+    if (addParams.title === '') {
+      args.title = '未命名';
+    }
     const flag = addToDoListData(args);
     if (flag) {
       getWaitData();
