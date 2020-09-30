@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 5vh 10vw;
+  padding: 3vh 10vw;
   width: 100%;
   height: 100%;
 }
@@ -28,6 +28,7 @@
 
 .@{prefixClass}_body {
   width: 100%;
+  padding-top: 2vh;
   flex: auto;
   .ant-list {
     height: 100%;
@@ -36,6 +37,17 @@
       .ant-spin-spinnin {
         max-height: unset;
       }
+    }
+  }
+  .@{prefixClass}_item_header {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 255, 255, 0.5);
+    height: 5vh;
+    > div {
+      display: flex;
+      justify-content: center;
+      font-size: 2vh;
     }
   }
   .@{prefixClass}_item_finished {
@@ -62,7 +74,7 @@
     white-space: nowrap;
   }
   .@{prefixClass}_item_btn_container {
-    width: 10vw;
+    width: 15vw;
     display: flex;
     justify-content: center;
     > span.anticon {
@@ -83,6 +95,11 @@
       &.anticon-delete {
         &:hover {
           color: rgb(24, 144, 255);
+        }
+      }
+      &.anticon-plus-circle {
+        &:hover {
+          color: rgb(0, 100, 255);
         }
       }
     }

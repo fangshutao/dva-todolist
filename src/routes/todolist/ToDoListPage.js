@@ -1,12 +1,17 @@
 'use strict';
+/**
+ * Created by fangst on 2020/09/29.
+ * todolist Demo
+ */
 import React, { useCallback, useEffect, useState, Fragment } from 'react';
 import _ from 'lodash';
-import { Button, Input, List, Tooltip, Modal, Form } from 'antd';
+import { Input, List, Tooltip, Modal, message } from 'antd';
 import {
   FireOutlined,
   DeleteOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
+  PlusCircleOutlined,
 } from '@ant-design/icons';
 import {
   queryToDoListData,
@@ -22,34 +27,33 @@ const prefixClass = 'toDoListPage';
 const Index = (props) => {
   const [loading, setLoading] = useState(false);
 
-  const [showAddModal, setShowAddModal] = useState(false);
-
   const [searchParams, setSearchParams] = useState({
     gjz: '',
+  });
+
+  const [addParams, setAddParams] = useState({
+    title: '',
+    description: '',
   });
 
   const [list, setList] = useState([]);
 
   useEffect(() => {
-    getWaitData();
-  }, []);
+    const autoSearch = _.throttle(getWaitData, 1000);
+    autoSearch();
+  }, [searchParams.gjz]);
 
-  const getWaitData = useCallback(async (args) => {
+  const getWaitData = useCallback(async () => {
     setLoading(true);
-    let params = searchParams;
-    if (!_.isEmpty(args)) {
-      params = args;
-      setSearchParams(args);
-    }
-    const res = await queryToDoListData(params);
+    const res = await queryToDoListData(searchParams);
     if (+res.status === 200) {
-      const newList = sortData(res.data);
+      const newList = formatData(res.data);
       setList(newList);
       setLoading(false);
     }
   });
 
-  const sortData = (data) => {
+  const formatData = useCallback((data) => {
     const status0Data = [];
     const status1Data = [];
     const status2Data = [];
@@ -68,16 +72,29 @@ const Index = (props) => {
           break;
       }
     });
+    const editData = [
+      {
+        id: 'demo-list-add',
+        title: '',
+        description: '',
+        time: '',
+        status: 1,
+      },
+    ];
     const time0Sort = _.sortBy(status0Data, (o) => o.date);
     const time1Sort = _.sortBy(status1Data, (o) => o.date);
     const time2Sort = _.sortBy(status2Data, (o) => o.date);
-    return [...time2Sort, ...time1Sort, ...time0Sort];
-  };
+    return [...editData, ...time2Sort, ...time1Sort, ...time0Sort];
+  });
 
-  const onAddData = useCallback((values) => {
+  const onAddData = useCallback(() => {
+    if (addParams.title === '' && addParams.description === '') {
+      message.warn('请至少填写一项内容');
+      return;
+    }
     const nowDate = new Date();
     const args = {
-      ...values,
+      ...addParams,
       status: 1,
       id: nowDate.getTime(),
       date: nowDate.getTime(),
@@ -85,7 +102,10 @@ const Index = (props) => {
     const flag = addToDoListData(args);
     if (flag) {
       getWaitData();
-      setShowAddModal(false);
+      setAddParams({
+        title: '',
+        description: '',
+      });
     }
   });
 
@@ -119,15 +139,16 @@ const Index = (props) => {
     }
   });
 
-  const onResetData = useCallback(() => {
-    getWaitData({
-      gjz: '',
-    });
-  });
-
   const onItemChange = useCallback((value, field) => {
     setSearchParams({
       ...searchParams,
+      [field]: value.trim(),
+    });
+  });
+
+  const onAddItemChange = useCallback((value, field) => {
+    setAddParams({
+      ...addParams,
       [field]: value.trim(),
     });
   });
@@ -140,20 +161,78 @@ const Index = (props) => {
           value={searchParams.gjz}
           onChange={(e) => onItemChange(e.target.value, 'gjz')}
         />
-        <Button type="primary" onClick={() => getWaitData()}>
-          查询
-        </Button>
-        <Button type="primary" onClick={onResetData}>
-          重置
-        </Button>
-        <Button
-          type="primary"
-          onClick={() => {
-            setShowAddModal(true);
-          }}
-        >
-          新增
-        </Button>
+      </div>
+    );
+  });
+
+  const renderBtnContainer = useCallback(({ id, status }) => {
+    return (
+      <div className={`${prefixClass}_item_btn_container`}>
+        {status === 0 ? (
+          '已完成'
+        ) : (
+          <Fragment>
+            <Tooltip title="完成">
+              <CheckCircleOutlined onClick={() => onFinishData(id)} />
+            </Tooltip>
+            <Tooltip title="重点标注" onClick={() => onPointData(id)}>
+              <FireOutlined className={status === 2 ? 'active' : ''} />
+            </Tooltip>
+            <Tooltip title="删除">
+              <DeleteOutlined onClick={() => onDeleteData(id)} />
+            </Tooltip>
+          </Fragment>
+        )}
+      </div>
+    );
+  });
+
+  const renderListItem = useCallback((item) => {
+    const { id, title, description } = item;
+    return (
+      <Fragment key={id}>
+        <div className={`${prefixClass}_item_title`}>
+          <Tooltip title={title}>{title}</Tooltip>
+        </div>
+        <div className={`${prefixClass}_item_description`}>
+          <Tooltip title={description}>{description}</Tooltip>
+        </div>
+        {renderBtnContainer(item)}
+      </Fragment>
+    );
+  });
+
+  const renderEditItem = useCallback((item) => {
+    const { id } = item;
+    return (
+      <Fragment key={id}>
+        <div className={`${prefixClass}_item_title`}>
+          <Input
+            value={addParams.title || ''}
+            onChange={(e) => onAddItemChange(e.target.value, 'title')}
+          />
+        </div>
+        <div className={`${prefixClass}_item_description`}>
+          <Input
+            value={addParams.description || ''}
+            onChange={(e) => onAddItemChange(e.target.value, 'description')}
+          />
+        </div>
+        <div className={`${prefixClass}_item_btn_container`}>
+          <Tooltip title="确认新增">
+            <PlusCircleOutlined onClick={() => onAddData(id)} />
+          </Tooltip>
+        </div>
+      </Fragment>
+    );
+  });
+
+  const renderItemHeader = useCallback(() => {
+    return (
+      <div className={`${prefixClass}_item_header`}>
+        <div className={`${prefixClass}_item_title`}>标题</div>
+        <div className={`${prefixClass}_item_description`}>描述</div>
+        <div className={`${prefixClass}_item_btn_container`}>操作</div>
       </div>
     );
   });
@@ -161,45 +240,24 @@ const Index = (props) => {
   const renderBody = useCallback(() => {
     return (
       <div className={`${prefixClass}_body`}>
+        {renderItemHeader()}
         <List
           className="demo-loadmore-list"
           loading={loading}
           itemLayout="horizontal"
           dataSource={list}
-          renderItem={({ id, title, description, status }) => (
+          renderItem={(item, index) => (
             <List.Item
-              key={id}
+              key={item.id}
               className={
-                status === 0
+                item.status === 0
                   ? `${prefixClass}_item_finished`
-                  : status === 2
+                  : item.status === 2
                   ? `${prefixClass}_item_pointed`
                   : ''
               }
             >
-              <div className={`${prefixClass}_item_title`}>
-                <Tooltip title={title}>{title}</Tooltip>
-              </div>
-              <div className={`${prefixClass}_item_description`}>
-                <Tooltip title={description}>{description}</Tooltip>
-              </div>
-              <div className={`${prefixClass}_item_btn_container`}>
-                {status === 0 ? (
-                  '已完成'
-                ) : (
-                  <Fragment>
-                    <Tooltip title="完成">
-                      <CheckCircleOutlined onClick={() => onFinishData(id)} />
-                    </Tooltip>
-                    <Tooltip title="重点标注" onClick={() => onPointData(id)}>
-                      <FireOutlined className={status === 2 ? 'active' : ''} />
-                    </Tooltip>
-                    <Tooltip title="删除">
-                      <DeleteOutlined onClick={() => onDeleteData(id)} />
-                    </Tooltip>
-                  </Fragment>
-                )}
-              </div>
+              {index === 0 ? renderEditItem(item) : renderListItem(item)}
             </List.Item>
           )}
         />
@@ -207,56 +265,10 @@ const Index = (props) => {
     );
   });
 
-  const renderModal = useCallback(() => {
-    return (
-      <Modal
-        className={`${prefixClass}_modal`}
-        title="新增待办事项"
-        visible={showAddModal}
-        footer={null}
-        destroyOnClose={true}
-        onCancel={() => setShowAddModal(false)}
-      >
-        <Form onFinish={onAddData}>
-          <Form.Item
-            name="title"
-            label="标题"
-            rules={[
-              {
-                required: true,
-                message: '请输入待办事项标题',
-              },
-            ]}
-          >
-            <Input placeholder="请输入标题" />
-          </Form.Item>
-          <Form.Item
-            name="description"
-            label="描述"
-            rules={[
-              {
-                required: true,
-                message: '请输入待办事项标题描述',
-              },
-            ]}
-          >
-            <Input.TextArea placeholder="请输入描述" />
-          </Form.Item>
-          <div className={`${prefixClass}_modal_btn`}>
-            <Button type="primary" htmlType="submit">
-              提交
-            </Button>
-          </div>
-        </Form>
-      </Modal>
-    );
-  });
-
   return (
     <div className={`${prefixClass}_container`}>
       {renderHeader()}
       {renderBody()}
-      {renderModal()}
     </div>
   );
 };
