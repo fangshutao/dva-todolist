@@ -11,7 +11,7 @@
 
 .@{prefixClass}_header {
   width: 100%;
-  flex: 0 0 5vh;
+  height: 5vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -20,7 +20,7 @@
     font-size: 1.8vh;
   }
   .ant-input {
-    width: 20vw;
+    width: 25vw;
     height: 3.5vh;
     font-size: 1.7vh;
     padding: 0 0 0 0.5vw;
@@ -29,15 +29,16 @@
 
 .@{prefixClass}_body {
   width: 100%;
+  height: 87vh;
   padding-top: 2vh;
-  flex: auto;
   .ant-input {
     height: 3.5vh;
     font-size: 1.7vh;
     padding: 0 0 0 0.5vw;
   }
   .ant-list {
-    height: 100%;
+    height: calc(100% - 5vh);
+    overflow-y: auto;
     .ant-spin-nested-loading {
       height: 100%;
       .ant-spin-spinnin {
@@ -78,13 +79,13 @@
   }
   .@{prefixClass}_item_description {
     padding-left: 1vw;
-    width: 50vw;
+    width: 40vw;
     overflow:hidden; 
     text-overflow:ellipsis;
     white-space: nowrap;
   }
   .@{prefixClass}_item_btn_container {
-    width: 15vw;
+    width: 25vw;
     display: flex;
     justify-content: center;
     > span.anticon {
@@ -112,6 +113,11 @@
           color: rgb(0, 100, 255);
         }
       }
+      &.anticon-form {
+        &:hover {
+          color: rgb(255, 136, 0);
+        }
+      }
     }
   }
 }
@@ -129,3 +135,66 @@
     font-size: 1.7vh;
   }
 }
+
+.@{prefixClass}_modal_container {
+  width: 40rem !important;
+  height: 35vh;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  .anticon-close {
+    font-size: 1.7vh;
+  }
+  .ant-modal-header {
+    padding: 0;
+  }
+  .ant-modal-title {
+    font-size: 2vh;
+    height: 5vh;
+    display: flex;
+    align-items: center;
+    padding-left: 1vh;
+  }
+  .ant-modal-content {
+    width: 100%;
+    height: 100%;
+  }
+  .ant-modal-body {
+    height: 30vh;
+    padding: 1vh;
+    .ant-form {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      .ant-form-item {
+        margin: 0;
+      }
+      .ant-form-item-label {
+        > label {
+          height: 3.5vh;
+          font-size: 1.6vh;
+        }
+      }
+    }
+    .ant-input {
+      height: 3.5vh;
+      font-size: 1.6vh;
+    }
+    textarea {
+      height: 10vh !important;
+      font-size: 1.6vh;
+    }
+  }
+  .@{prefixClass}_modal_btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .ant-btn {
+      height: 3.5vh;
+      padding: 0 2vh;
+      font-size: 1.6vh;
+    }
+  }
+}
+  

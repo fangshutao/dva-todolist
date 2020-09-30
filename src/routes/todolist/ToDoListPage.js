@@ -12,6 +12,7 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   PlusCircleOutlined,
+  FormOutlined,
 } from '@ant-design/icons';
 import {
   queryToDoListData,
@@ -19,7 +20,9 @@ import {
   deleteToDoListData,
   finishToDoListData,
   pointToDoListData,
+  editToDoListData,
 } from '@/services/example';
+import EditModal from './EditModal';
 import './index.less';
 
 const prefixClass = 'toDoListPage';
@@ -41,6 +44,12 @@ const Index = (props) => {
 
   // 列表查询结果
   const [list, setList] = useState([]);
+
+  // 编辑模态框显隐
+  const [editModal, setEditModal] = useState({
+    show: false,
+    item: null,
+  });
 
   useEffect(() => {
     const autoSearch = _.throttle(getWaitData, 1000);
@@ -122,6 +131,22 @@ const Index = (props) => {
     }
   });
 
+  // 打开数据编辑
+  const onEditDataClick = useCallback((item) => {
+    setEditModal({
+      show: true,
+      item,
+    });
+  });
+
+  // 标注重要数据
+  const onEditData = useCallback((item) => {
+    const flag = editToDoListData(item);
+    if (flag) {
+      getWaitData();
+    }
+  });
+
   // 删除数据
   const onDeleteData = useCallback((id) => {
     Modal.confirm({
@@ -183,13 +208,17 @@ const Index = (props) => {
     );
   });
 
-  const renderBtnContainer = useCallback(({ id, status }) => {
+  const renderBtnContainer = useCallback((item) => {
+    const { id, status } = item;
     return (
       <div className={`${prefixClass}_item_btn_container`}>
         {status === 0 ? (
           '已完成'
         ) : (
           <Fragment>
+            <Tooltip title="编辑" onClick={() => onEditDataClick(item)}>
+              <FormOutlined />
+            </Tooltip>
             <Tooltip title="完成">
               <CheckCircleOutlined onClick={() => onFinishData(id)} />
             </Tooltip>
@@ -287,6 +316,11 @@ const Index = (props) => {
     <div className={`${prefixClass}_container`}>
       {renderHeader()}
       {renderBody()}
+      <EditModal
+        modalStatus={editModal}
+        modalDisplay={setEditModal}
+        onFinish={onEditData}
+      />
     </div>
   );
 };

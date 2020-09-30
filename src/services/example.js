@@ -66,3 +66,17 @@ export const pointToDoListData = ({ id }) => {
   localStorage.setItem('todolist', JSON.stringify(oldItems));
   return true;
 };
+
+export const editToDoListData = ({ id, title, description }) => {
+  const oldItems = JSON.parse(localStorage.getItem('todolist'));
+  _.each(oldItems, (item) => {
+    if (item.id === id) {
+      item.title = title;
+      item.description = description;
+      return false;
+    }
+    return true;
+  });
+  localStorage.setItem('todolist', JSON.stringify(oldItems));
+  return true;
+};
